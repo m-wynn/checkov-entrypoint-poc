@@ -1,0 +1,113 @@
+---
+name: checkov
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkov_main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Checkov MAIN File
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          file: tf/bad.tf
+          framework: terraform
+          soft_fail: true
+
+      - name: Checkov MAIN Directory
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: tf
+          framework: terraform
+          soft_fail: true
+
+  checkov_main_should_fail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Create yaml files
+        run: |
+          cat <<EOF > checkov.directory.yaml
+          directory:
+            - ./tf
+          EOF
+
+          cat <<EOF > checkov.file.yaml
+          file:
+            - ./tf/bad.tf
+          EOF
+
+      - name: SHOULD FAIL Checkov PR file yaml
+        if: always()
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ""
+          framework: terraform
+          soft_fail: true
+          config_file: checkov.file.yaml
+
+      - name: SHOULD FAIL Checkov PR directory yaml
+        if: always()
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ""
+          framework: terraform
+          soft_fail: true
+          config_file: checkov.directory.yaml
+
+  checkov_my_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Checkov PR File
+        uses: ./checkov-action
+        with:
+          file: tf/bad.tf
+          framework: terraform
+          soft_fail: true
+
+      - name: Checkov PR Directory
+        uses: ./checkov-action
+        with:
+          directory: tf
+          framework: terraform
+          soft_fail: true
+
+      - name: Create yaml files
+        run: |
+          cat <<EOF > checkov.directory.yaml
+          directory:
+            - ./tf
+          EOF
+
+          cat <<EOF > checkov.file.yaml
+          file:
+            - ./tf/bad.tf
+          EOF
+
+      - name: Checkov PR file yaml
+        uses: ./checkov-action
+        with:
+          directory: ""
+          framework: terraform
+          soft_fail: true
+          config_file: checkov.file.yaml
+
+      - name: Checkov PR directory yaml
+        uses: ./checkov-action
+        with:
+          directory: ""
+          framework: terraform
+          soft_fail: true
+          config_file: checkov.directory.yaml
