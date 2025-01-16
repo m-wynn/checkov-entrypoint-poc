@@ -28,6 +28,13 @@ jobs:
           framework: terraform
           soft_fail: true
 
+      - name: Checkov MAIN no file or dir
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          soft_fail: true
+
+
   checkov_main_should_fail:
     runs-on: ubuntu-latest
     steps:
@@ -81,6 +88,12 @@ jobs:
         uses: ./checkov-action
         with:
           directory: tf
+          framework: terraform
+          soft_fail: true
+
+      - name: Checkov PR no file or dir
+        uses: ./checkov-action
+        with:
           framework: terraform
           soft_fail: true
 
